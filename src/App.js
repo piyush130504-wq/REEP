@@ -69,19 +69,6 @@ const TargetIcon = () => (
   </svg>
 );
 
-const InstitutionIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 22h20M12 2l10 5-10 5-10-5zM12 12v10M17 10v12M7 10v12" />
-  </svg>
-);
-
-const ResearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 2v6.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 8.5V2" />
-    <path d="M7 2h10M8 15h8" />
-  </svg>
-);
-
 const RocketIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
@@ -167,8 +154,7 @@ function Hero({ onNav }) {
           <span className="gradient-text">Now Open for Research Collaboration.</span>
         </h1>
         <p className="sub">
-          REEP connects India's top academic institutions, applied researchers, and deep-tech startups
-          with real infrastructure challenges - from national highways to urban water systems.
+          REEP connects deep-tech startups with real infrastructure challenges - from national highways to urban water systems.
         </p>
         <div className="hero-cta">
           <button className="btn btn-primary" data-testid="hero-ideas-btn" onClick={() => onNav("contact")}>
@@ -211,7 +197,7 @@ function AboutReep() {
           </h2>
           <div className="about-text-blocks">
             <p className="lede">
-              REEP (Rodic Engineering Excellence Program) is an industry platform built to advance infrastructure innovation, connecting academic institutions, researchers, and startups around real infrastructure challenges.
+              REEP (Rodic Engineering Excellence Program) is an industry platform built to advance infrastructure innovation, connecting deep-tech startups around real infrastructure challenges.
             </p>
             <p>
               With over two decades of infrastructure consulting experience, Rodic launched REEP to formalize industry-academia collaboration through a structured research partnership program that channels technical expertise directly into infrastructure innovation.
@@ -278,29 +264,9 @@ function AudienceRouting({ onNav }) {
       <div className="sec-head" style={{ marginBottom: "var(--s6)" }}>
         <Eyebrow>Collaborate</Eyebrow>
         <h2>Join the <span className="gradient-text">ecosystem.</span></h2>
-        <p className="lede">Three ways to engage — each built around how you work.</p>
+        <p className="lede">Built around how you work.</p>
       </div>
       <div className="routing-grid">
-
-        {/* Institution Path */}
-        <div className="routing-card" data-testid="route-institution">
-          <div className="routing-icon"><InstitutionIcon /></div>
-          <h3>Academic Institutions</h3>
-          <p>Establish an MoU with Rodic to access real-world infrastructure data, co-publish applied research, and secure funded engineering projects for your department.</p>
-          <button className="btn btn-primary" onClick={() => onNav("contact")}>
-            Partner with REEP <span className="ar">→</span>
-          </button>
-        </div>
-
-        {/* Researcher Path */}
-        <div className="routing-card" data-testid="route-researcher">
-          <div className="routing-icon"><ResearchIcon /></div>
-          <h3>Applied Researchers & PhDs</h3>
-          <p>Work on live problem statements — pavement fatigue modelling, bridge health monitoring, urban water-network optimisation — with field datasets and named co-authorship.</p>
-          <button className="btn btn-primary" onClick={() => onNav("contact")}>
-            Submit a Research Proposal <span className="ar">→</span>
-          </button>
-        </div>
 
         {/* Startup Path */}
         <div className="routing-card" data-testid="route-startup">
@@ -530,7 +496,7 @@ function Footer({ onNav }) {
       <div className="footer-inner">
         <div>
           <div className="fbrand">REEP</div>
-          <p className="ftag">REEP — Rodic Engineering Excellence Program. Infrastructure innovation through industry-academia collaboration.</p>
+          <p className="ftag">REEP — Rodic Engineering Excellence Program. Infrastructure innovation through deep-tech startup collaboration.</p>
         </div>
         <div>
           <h5>Navigate</h5>
