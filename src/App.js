@@ -306,7 +306,7 @@ function AudienceRouting({ onNav }) {
         <div className="routing-card" data-testid="route-startup">
           <div className="routing-icon"><RocketIcon /></div>
           <h3>Deep-Tech Startups</h3>
-          <p>Deploy your solution on live government infrastructure through paid pilots, validated and scaled via Rodic's <a href="https://nasscom.in/" target="_blank" rel="noopener noreferrer" style="color: #0000FF; text-decoration: underline;"><strong>NASSCOM</strong></a> collaboration track.</p>
+          <p>Deploy your solution on live government infrastructure through paid pilots, validated and scaled via Rodic's <a href="https://nasscom.in/" target="_blank" rel="noopener noreferrer"><strong>NASSCOM</strong></a> collaboration track.</p>
           <button className="btn btn-primary" onClick={() => onNav("contact")}>
             Begin Startup Application <span className="ar">→</span>
           </button>
