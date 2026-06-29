@@ -1,7 +1,9 @@
+rodic.css new
+
 /* ============================================================
-   REEP — Rodic Engineering Excellence Program
-   Deep navy · orange accent · amber warm · sky cool
-   Space Grotesk (display) · Inter (body) · Space Mono (tech)
+   REEP â€” Rodic Engineering Excellence Program
+   Deep navy Â· orange accent Â· amber warm Â· sky cool
+   Space Grotesk (display) Â· Inter (body) Â· Space Mono (tech)
    Dark immersive wireframe aesthetic
    ============================================================ */
 
@@ -420,20 +422,50 @@ em, .it { font-style: italic; }
 /* ============ AUDIENCE ROUTING ============ */
 #routing { background: var(--navy-deep); position: relative; z-index: 5; }
 
+/* Legacy grid (kept for safety) */
 .routing-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--s4);
 }
-@media (min-width: 720px) and (max-width: 1023px) {
-  .routing-grid {
+
+/* New split: card on left, gallery on right */
+.routing-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s6);
+  align-items: start;
+}
+@media (min-width: 720px) {
+  .routing-split {
     grid-template-columns: 1fr 1fr;
   }
 }
 @media (min-width: 1024px) {
-  .routing-grid {
-    grid-template-columns: repeat(3, 1fr);
+  .routing-split {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--s8);
+    align-items: center;
   }
+}
+
+/* Photo grid inside gallery panel */
+.routing-gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.gallery-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+  display: block;
+  transition: transform var(--fast), opacity var(--fast);
+}
+.gallery-img:hover {
+  transform: scale(1.03);
+  opacity: 0.9;
 }
 
 .routing-card {
@@ -751,3 +783,6 @@ em, .it { font-style: italic; }
   .hero-stat-num { font-size: 18px; }
   .hero-stat-divider { height: 28px; }
 }
+
+
+
