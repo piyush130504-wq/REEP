@@ -1,783 +1,625 @@
-/* ============================================================
-   REEP — Rodic Engineering Excellence Program
-   Deep navy · orange accent · amber warm · sky cool
-   Space Grotesk (display) · Inter (body) · Space Mono (tech)
-   Dark immersive wireframe aesthetic
-   ============================================================ */
+import { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import "@/rodic.css";
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
-:root {
-  --navy:       #023047;
-  --navy-deep:  #011627;
-  --navy-light: #034067;
-  --surface:    rgba(3, 48, 71, 0.6);
-  --surface-2:  rgba(3, 48, 71, 0.35);
-  --glass:      rgba(2, 48, 71, 0.75);
-  --glass-border: rgba(255,255,255,0.08);
+/* Real aerial photograph of an Indian coastal highway interchange (documentary asset, not AI) */
+const HERO_BG =
+  "https://images.unsplash.com/photo-1708357997379-e55c1636e0d7?crop=entropy&cs=srgb&fm=jpg&q=85&w=2000";
 
-  --orange:     #FB8500;
-  --orange-d:   #E07600;
-  --amber:      #FFB703;
-  --sky:        #219EBC;
-  --sky-light:  #8ECAE6;
-  --cream:      #F4F3EE;
+/* ───────────────── ICONS (distinct, 1.5px stroke, 24 grid) ───────────────── */
+const iconProps = {
+  width: 24, height: 24, viewBox: "0 0 24 24", fill: "none",
+  stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round",
+};
 
-  --text:       #F0F4F8;
-  --text-2:     #8BA4BD;
-  --text-muted: #7C97B0;
-  --ink:        #0A1929;
+const RoadIcon = () => (
+  <svg {...iconProps}><path d="M4 21 8.5 3" /><path d="M20 21 15.5 3" /><path d="M12 4v3M12 10v3M12 17v3" /></svg>
+);
+const ChipIcon = () => (
+  <svg {...iconProps}><rect x="6" y="6" width="12" height="12" rx="1.5" /><rect x="9.5" y="9.5" width="5" height="5" rx="0.5" /><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" /></svg>
+);
+const LeafIcon = () => (
+  <svg {...iconProps}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6" /></svg>
+);
+const TransitIcon = () => (
+  <svg {...iconProps}><rect x="4" y="3" width="16" height="14" rx="2" /><path d="M4 11h16M8 17v3M16 17v3" /><circle cx="8" cy="14" r="0.6" fill="currentColor" /><circle cx="16" cy="14" r="0.6" fill="currentColor" /></svg>
+);
+const DropletIcon = () => (
+  <svg {...iconProps}><path d="M12 2.7s5.5 6 5.5 10.5a5.5 5.5 0 0 1-11 0C6.5 8.7 12 2.7 12 2.7z" /><path d="M9.5 13a2.5 2.5 0 0 0 2.5 2.5" /></svg>
+);
+const CraneIcon = () => (
+  <svg {...iconProps}><path d="M3 21h18" /><path d="M7 21V5l10-2" /><path d="M3 5h15" /><path d="M11 5v4" /><path d="M9.6 9h2.8L11 12z" /></svg>
+);
 
-  --display: 'Space Grotesk', system-ui, sans-serif;
-  --body:    'Inter', system-ui, sans-serif;
-  --mono:    'Space Mono', monospace;
+/* ─── FOCUS AREAS ─── */
+const FOCUS_AREAS = [
+  { id: "infrastructure", title: "Infrastructure Innovation", desc: "Driving infrastructure innovation across highways, bridges, and tunnels in India", Icon: RoadIcon },
+  { id: "ai", title: "AI & Digital Transformation", desc: "Advancing AI and digital transformation in construction and infrastructure delivery", Icon: ChipIcon },
+  { id: "sustainability", title: "Sustainability & Climate Resilience", desc: "Sustainable infrastructure research for climate-resilient development", Icon: LeafIcon },
+  { id: "transportation", title: "Transportation & Mobility", desc: "Smart transportation and mobility solutions for urban and regional connectivity", Icon: TransitIcon },
+  { id: "water", title: "Water & Urban Infrastructure", desc: "Urban water infrastructure innovation through research-led engineering", Icon: DropletIcon },
+  { id: "construction", title: "Construction Technology", desc: "Construction technology and project management innovation across infrastructure delivery", Icon: CraneIcon },
+];
 
-  --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px;
-  --s5: 48px; --s6: 64px; --s7: 96px; --s8: 128px;
-  --maxw: 1280px;
-  --fast: 200ms cubic-bezier(.22,.61,.36,1);
-  --slow: 500ms cubic-bezier(.22,.61,.36,1);
-  --radius: 8px;
-  --radius-sm: 4px;
-  --radius-pill: 999px;
-}
+/* ─── LEADERS ─── */
+const leaders = [
+  { name: "Mr. Raj Kumar", designation: "Chairman & Managing Director", image: "https://d1vah4ferpk10z.cloudfront.net/raj0kumar_cmd_rodic_43dc5ed26a.png" },
+  { name: "Mr. Anshuman Krishanu", designation: "Chief Operating Officer", image: "https://d1vah4ferpk10z.cloudfront.net/coo_anshuman_49f52bbd7c.png" },
+  { name: "Mr. Sapan Gupta", designation: "Chief Financial Officer", image: "https://d1vah4ferpk10z.cloudfront.net/cfo_sapan_89331d5330.png" },
+];
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* ─── NAV ITEMS ─── */
+const navItems = [
+  { id: "home", label: "Home" },
+  { id: "focus", label: "Focus Areas" },
+  { id: "leaders", label: "Leaders" },
+  { id: "contact", label: "Contact" },
+];
 
-body {
-  margin: 0;
-  background: var(--navy-deep);
-  color: var(--text-2);
-  font-family: var(--body);
-  font-size: 16px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-}
+/* ───────────────── COMPONENTS ───────────────── */
 
-/* Subtle engineering grid */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(33,158,188,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(33,158,188,0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
-}
+const TargetIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
 
-.reep-root { position: relative; z-index: 1; }
+const InstitutionIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 22h20M12 2l10 5-10 5-10-5zM12 12v10M17 10v12M7 10v12" />
+  </svg>
+);
 
-::selection { background: var(--orange); color: var(--navy-deep); }
+const ResearchIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 2v6.5L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L15 8.5V2" />
+    <path d="M7 2h10M8 15h8" />
+  </svg>
+);
 
-h1,h2,h3,h4 { font-family: var(--display); font-weight: 700; margin: 0; color: var(--text); }
-h1 { font-size: clamp(40px, 6vw, 80px); line-height: 1.05; letter-spacing: -0.03em; }
-h2 { font-size: clamp(28px, 4vw, 48px); line-height: 1.1; letter-spacing: -0.02em; }
-h3 { font-size: clamp(20px, 2.4vw, 28px); line-height: 1.15; letter-spacing: -0.015em; }
-h4 { font-size: 18px; line-height: 1.25; letter-spacing: -0.01em; }
-p  { margin: 0; color: var(--text-2); }
-em, .it { font-style: italic; }
+const RocketIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+    <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  </svg>
+);
 
-/* ============ GRADIENT TEXT ============ */
-.gradient-text {
-  background: linear-gradient(135deg, var(--orange), var(--amber));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+const Eyebrow = ({ children }) => <span className="eyebrow">{children}</span>;
 
-/* ============ BANDS / LAYOUT ============ */
-.band {
-  position: relative; width: 100%;
-  padding: var(--s8) 0;
-  opacity: 0; transform: translateY(24px);
-  transition: opacity var(--slow), transform var(--slow);
-}
-.band.reveal { opacity: 1; transform: none; }
-.stagger-reveal {
-  opacity: 0; transform: translateY(24px);
-  transition: opacity var(--slow), transform var(--slow);
-}
-.stagger-reveal.reveal-active {
-  opacity: 1; transform: none;
-}
-@media (prefers-reduced-motion: reduce){ 
-  .band, .stagger-reveal { opacity:1; transform:none; transition:none; } 
-}
-.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s4); }
-
-/* ============ SECTION HEAD ============ */
-.sec-head { max-width: 820px; margin-bottom: var(--s6); }
-.eyebrow {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--orange);
-  display: inline-flex; align-items: center; gap: 10px; margin-bottom: var(--s3);
-}
-.eyebrow::before { content:''; width: 26px; height: 1px; background: var(--orange); display:inline-block; }
-.sec-head h2 { margin-bottom: var(--s3); }
-.sec-head .lede { font-size: 18px; line-height: 1.6; max-width: 680px; color: var(--text-2); }
-
-/* ============ BUTTONS ============ */
-.btn {
-  font-family: var(--display); font-weight: 600; font-size: 14px;
-  letter-spacing: 0.03em; cursor: pointer; border: none;
-  padding: 14px 28px; border-radius: var(--radius-pill);
-  transition: transform var(--fast), box-shadow var(--fast), background-color var(--fast), border-color var(--fast), color var(--fast);
-  display: inline-flex; align-items: center; gap: 10px;
-  text-decoration: none;
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--orange), var(--orange-d));
-  color: var(--navy-deep);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.16);
-}
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
-}
-.btn-ghost {
-  background: transparent; color: var(--text);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(8px);
-}
-.btn-ghost:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: var(--orange);
-  color: var(--orange);
-}
-.btn .ar { font-family: var(--mono); transition: transform var(--fast); }
-.btn:hover .ar { transform: translateX(3px); }
-
-/* ============ NAV ============ */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 var(--s4); height: 72px;
-  background: rgba(1, 22, 39, 0.8);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  border-bottom: 1px solid var(--glass-border);
-}
-.nav-brand-lockup {
-  display: flex;
-  align-items: center;
-}
-.nav-rodic-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-}
-.nav-rodic-logo img {
-  height: 56px;
-  width: auto;
-  display: block;
-}
-.nav-brand-separator {
-  color: #4a7a9b;
-  font-size: 20px;
-  margin: 0 12px;
-  font-weight: 400;
-  line-height: 1;
-}
-.nav-logo {
-  font-family: var(--display); font-weight: 700; font-size: 20px;
-  color: var(--text); white-space: nowrap; cursor: pointer;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-.nav-logo .accent { color: var(--orange); }
-.nav-links { display: flex; align-items: center; gap: var(--s4); }
-.nav-link {
-  font-family: var(--body); font-size: 14px; font-weight: 500;
-  color: var(--text-2); cursor: pointer; position: relative; padding: 6px 0;
-  transition: color var(--fast);
-}
-.nav-link::after {
-  content:''; position:absolute; left:0; bottom:-2px; width:0; height:2px;
-  background: var(--orange); transition: width var(--fast); border-radius: 2px;
-}
-.nav-link:hover { color: var(--text); }
-.nav-link:hover::after { width: 100%; }
-.nav-cta { padding: 10px 22px; font-size: 13px; }
-
-.hamburger {
-  display: none; background: none; border: 1px solid var(--glass-border);
-  color: var(--text); width:44px;height:40px; cursor: pointer; line-height: 1;
-  font-size: 18px; border-radius: var(--radius-sm);
-}
-.mobile-panel {
-  display: none; flex-direction: column; position: fixed; top: 72px;
-  left: 0; right: 0; z-index: 99; background: rgba(1, 22, 39, 0.95);
-  backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
-  padding: var(--s3) var(--s4);
-}
-.mobile-panel.open { display: flex; }
-.mobile-panel .nav-link {
-  padding: 16px 0; border-bottom: 1px solid var(--glass-border);
-  font-size: 16px; display: block;
-}
-.mobile-panel .btn { margin-top: var(--s3); justify-content: center; }
-@media (max-width: 860px){
-  .nav-links { display: none; }
-  .hamburger { display: inline-flex; align-items:center; justify-content:center; }
-}
-
-/* ============ HERO ============ */
-.hero {
-  position: relative; padding: calc(72px + var(--s7)) 0 var(--s7);
-  min-height: 100vh; display: flex; align-items: center;
-  overflow: hidden;
-}
-.hero-bg {
-  position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
-  animation: kenBurns 12s ease-in-out infinite alternate;
-}
-@keyframes kenBurns {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.08); }
-}
-.hero-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(1, 22, 39, 0.88) 0%,
-    rgba(1, 22, 39, 0.75) 40%,
-    rgba(1, 22, 39, 0.92) 100%
+const Section = ({ id, variant = "", children }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("reveal")),
+      { rootMargin: "0px 0px -8% 0px", threshold: 0 }
+    );
+    if (el) obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <section id={id} ref={ref} className={`band ${variant}`} data-testid={`section-${id}`}>
+      <div className="wrap">{children}</div>
+    </section>
   );
-  z-index: 1;
-}
-.hero-inner {
-  max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s4);
-  text-align: center; position: relative; z-index: 2;
-}
-.hero-tag {
-  font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--orange);
-  display: inline-block; margin-bottom: var(--s4);
-  padding-left: 16px; padding-right: 16px;
-  border-left: 3px solid var(--orange); border-right: 3px solid var(--orange);
-}
-.hero h1 { margin-bottom: var(--s4); max-width: 20ch; margin-left: auto; margin-right: auto; }
-.hero .sub {
-  font-size: 18px; line-height: 1.6; max-width: 640px;
-  margin: 0 auto var(--s5); color: var(--text-2);
-}
-.hero-cta {
-  display: flex; gap: var(--s3); justify-content: center;
-  flex-wrap: wrap; align-items: center; margin-bottom: var(--s7);
-}
-.hero-text-link {
-  font-family: var(--body); font-size: 14px; font-weight: 500;
-  color: var(--text-2); cursor: pointer;
-  text-decoration: underline; text-underline-offset: 4px;
-  transition: color var(--fast);
-}
-.hero-text-link:hover { color: var(--orange); }
+};
 
-/* Hero trust stats */
-.hero-stats {
-  display: flex; justify-content: center; align-items: center;
-  gap: var(--s4); flex-wrap: wrap;
-  padding: var(--s4) var(--s5);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  background: rgba(1, 22, 39, 0.6);
-  backdrop-filter: blur(12px);
-  max-width: 720px; margin: 0 auto;
-}
-.hero-stat { text-align: center; }
-.hero-stat-num {
-  font-family: var(--display); font-weight: 700; font-size: 22px;
-  color: var(--text); display: block; line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-.hero-stat-label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--text-muted);
-  display: block; margin-top: 4px;
-}
-.hero-stat-divider {
-  width: 1px; height: 36px; background: var(--glass-border);
+/* ─── NAV ─── */
+function Nav({ onNav }) {
+  const [open, setOpen] = useState(false);
+  const go = (id) => { setOpen(false); onNav(id); };
+  return (
+    <>
+      <nav className="nav" data-testid="main-nav">
+        <div className="nav-brand-lockup">
+          <a href="https://www.rodicconsultants.com/" target="_blank" rel="noopener noreferrer" className="nav-rodic-logo">
+            <img src="/rodic-logo.webp" alt="Rodic Consultants" />
+          </a>
+          <span className="nav-brand-separator">×</span>
+          <span className="nav-logo" data-testid="nav-logo">REEP</span>
+        </div>
+        <div className="nav-links">
+          {navItems.map((n) => (
+            <span key={n.id} className="nav-link" data-testid={`nav-link-${n.id}`} onClick={() => go(n.id)}>
+              {n.label}
+            </span>
+          ))}
+          <button className="btn btn-primary nav-cta" data-testid="nav-contact-btn" onClick={() => go("contact")}>
+            Get in Touch
+          </button>
+        </div>
+        <button className="hamburger" aria-label="Open menu" data-testid="hamburger-btn" onClick={() => setOpen((o) => !o)}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        </button>
+      </nav>
+      <div className={`mobile-panel${open ? " open" : ""}`} data-testid="mobile-panel">
+        {navItems.map((n) => (
+          <span key={n.id} className="nav-link" data-testid={`mobile-link-${n.id}`} onClick={() => go(n.id)}>
+            {n.label}
+          </span>
+        ))}
+        <button className="btn btn-primary" data-testid="mobile-contact-btn" onClick={() => go("contact")}>
+          Get in Touch
+        </button>
+      </div>
+    </>
+  );
 }
 
-/* ============ ABOUT REEP ============ */
-#about {
-  background: var(--navy-deep);
-  position: relative;
-  border-bottom: 1px solid var(--glass-border);
-}
-.about-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s6);
-}
-@media (min-width: 900px) {
-  .about-layout {
-    grid-template-columns: 1.2fr 1fr;
-    align-items: center;
-  }
-}
-.about-text-blocks p {
-  color: var(--text-2);
-  line-height: 1.7;
-  font-size: 1.1rem;
-  margin-bottom: var(--s3);
-}
-.about-text-blocks p.lede {
-  color: var(--text);
-  font-size: 1.25rem;
-  font-weight: 400;
-}
-.about-visual {
-  position: relative;
-}
-.mission-card {
-  background: linear-gradient(135deg, rgba(3, 48, 71, 0.8), rgba(2, 48, 71, 0.4));
-  border: 1px solid var(--glass-border);
-  padding: var(--s6);
-  border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-}
-.mission-icon {
-  font-size: 32px;
-  color: var(--amber);
-  margin-bottom: var(--s3);
-}
-.mission-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: var(--s2);
-  color: var(--text);
-}
-.mission-card p {
-  color: var(--text-2);
-  line-height: 1.6;
-  margin-bottom: var(--s4);
-}
-.mission-stats {
-  display: flex;
-  gap: var(--s5);
-  padding-top: var(--s4);
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-.m-stat h4 {
-  font-size: 2.5rem;
-  font-family: var(--display);
-  color: var(--orange);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-.m-stat span {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
+/* ─── HERO ─── */
+function Hero({ onNav }) {
+  return (
+    <section id="home" className="hero" data-testid="hero">
+      <div className="hero-bg" style={{ backgroundImage: `url(${HERO_BG})` }} />
+      <div className="hero-overlay" />
+      <div className="hero-inner">
+        <span className="hero-tag">Rodic Engineering Excellence Program</span>
+        <h1 data-testid="hero-headline">
+          Two Decades of Infrastructure.<br />
+          <span className="gradient-text">Now Open for Research Collaboration.</span>
+        </h1>
+        <p className="sub">
+          REEP connects India's top academic institutions, applied researchers, and deep-tech startups
+          with real infrastructure challenges - from national highways to urban water systems.
+        </p>
+        <div className="hero-cta">
+          <button className="btn btn-primary" data-testid="hero-ideas-btn" onClick={() => onNav("contact")}>
+            Start a Partnership <span className="ar">→</span>
+          </button>
+          <span className="hero-text-link" data-testid="hero-contact-btn" onClick={() => onNav("focus")}>
+            Explore Focus Areas
+          </span>
+        </div>
+        <div className="hero-stats">
+          <div className="hero-stat">
+            <span className="hero-stat-num">20+</span>
+            <span className="hero-stat-label">Years in Infrastructure</span>
+          </div>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat">
+            <span className="hero-stat-num">₹10,000 Cr+</span>
+            <span className="hero-stat-label">Projects Delivered</span>
+          </div>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat">
+            <span className="hero-stat-num">NASSCOM</span>
+            <span className="hero-stat-label">Ecosystem Partner</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
-/* ============ FOCUS AREAS ============ */
-#focus { background: var(--navy); }
+/* ─── ABOUT REEP ─── */
+function AboutReep() {
+  return (
+    <Section id="about">
+      <div className="about-layout">
+        <div className="about-content">
+          <Eyebrow>About REEP</Eyebrow>
+          <h2 style={{ marginBottom: "var(--s4)" }}>
+            Advancing <span className="gradient-text">infrastructure innovation</span> across India.
+          </h2>
+          <div className="about-text-blocks">
+            <p className="lede">
+              REEP (Rodic Engineering Excellence Program) is an industry platform built to advance infrastructure innovation, connecting academic institutions, researchers, and startups around real infrastructure challenges.
+            </p>
+            <p>
+              With over two decades of infrastructure consulting experience, Rodic launched REEP to formalize industry-academia collaboration through a structured research partnership program that channels technical expertise directly into infrastructure innovation.
+            </p>
+          </div>
+          <div className="about-creds" data-testid="about-creds">
+            <span>ISO 9001:2015 Certified</span>
+            <span>Government Empanelled</span>
+            <span>A Division of Rodic Consultants</span>
+          </div>
+        </div>
 
-.focus-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--s4);
-  margin-top: var(--s5);
-}
-.focus-card {
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: var(--s5);
-  transition: transform var(--fast), border-color var(--fast), background-color var(--fast);
-  display: flex;
-  flex-direction: column;
-}
-.focus-card:hover {
-  border-color: var(--orange);
-  background: rgba(3, 48, 71, 0.8);
-  transform: translateY(-4px);
-}
-.focus-icon {
-  font-size: 24px;
-  color: var(--orange);
-  margin-bottom: var(--s3);
-}
-.focus-card h4 {
-  font-size: 20px;
-  margin-bottom: var(--s2);
-}
-.focus-card p {
-  color: var(--text-2);
-  line-height: 1.6;
-}
-
-/* ============ AUDIENCE ROUTING ============ */
-#routing { background: var(--navy-deep); position: relative; z-index: 5; }
-
-/* Legacy grid (kept for safety) */
-.routing-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s4);
-}
-
-/* New split: card on left, gallery on right */
-.routing-split {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--s6);
-  align-items: start;
-}
-@media (min-width: 720px) {
-  .routing-split {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (min-width: 1024px) {
-  .routing-split {
-    grid-template-columns: 5fr 7fr;
-    gap: var(--s8);
-    align-items: center;
-  }
+        <div className="about-visual">
+          <div className="mission-card">
+            <div className="mission-icon"><TargetIcon /></div>
+            <h3>Our Objective</h3>
+            <p>
+              Build research partnerships by creating startup collaboration pathways in infrastructure and construction technology, and strengthen India's broader innovation ecosystem.
+            </p>
+            <div className="mission-stats">
+              <div className="m-stat">
+                <h4>20+</h4>
+                <span>Years Experience</span>
+              </div>
+              <div className="m-stat">
+                <h4>6</h4>
+                <span>Core Focus Areas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
 }
 
-/* Photo grid inside gallery panel */
-.routing-gallery-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.gallery-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: calc(var(--radius) - 4px);
-  display: block;
-  transition: transform var(--fast), opacity var(--fast);
-}
-.gallery-img:hover {
-  transform: scale(1.03);
-  opacity: 0.9;
+/* ─── FOCUS AREAS ─── */
+function FocusAreas() {
+  return (
+    <Section id="focus">
+      <div className="sec-head">
+        <Eyebrow>Focus Areas</Eyebrow>
+        <h2>Engineering the <span className="gradient-text">future.</span></h2>
+        <p className="lede">Collaborate on the most critical challenges facing public infrastructure today.</p>
+      </div>
+
+      <div className="focus-grid" data-testid="focus-grid">
+        {FOCUS_AREAS.map((area) => (
+          <div className="focus-card" key={area.id} data-testid={`focus-card-${area.id}`}>
+            <div className="focus-icon"><area.Icon /></div>
+            <h4>{area.title}</h4>
+            <p>{area.desc}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
 }
 
-.routing-card {
-  background: linear-gradient(135deg, rgba(1, 22, 39, 0.9), rgba(2, 48, 71, 0.8));
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: var(--s6);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  transition: transform var(--fast), border-color var(--fast), background-color var(--fast);
-}
-.routing-card:hover {
-  border-color: var(--sky);
-  transform: translateY(-4px);
-}
-.routing-icon {
-  font-size: 32px;
-  color: var(--sky-light);
-  margin-bottom: var(--s3);
-}
-.routing-card h3 {
-  font-size: 24px;
-  margin-bottom: var(--s2);
-}
-.routing-card p {
-  color: var(--text-2);
-  line-height: 1.6;
-  flex: 1;
-}
-.routing-card .btn {
-  margin-top: var(--s4);
-  white-space: nowrap;
-}
-.routing-note {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
-  color: var(--text-muted); margin-top: var(--s2);
+/* ─── AUDIENCE ROUTING ─── */
+function AudienceRouting({ onNav }) {
+  return (
+    <Section id="routing">
+      <div className="sec-head" style={{ marginBottom: "var(--s6)" }}>
+        <Eyebrow>Collaborate</Eyebrow>
+        <h2>Join the <span className="gradient-text">ecosystem.</span></h2>
+        <p className="lede">Three ways to engage — each built around how you work.</p>
+      </div>
+      <div className="routing-grid">
+
+        {/* Institution Path */}
+        <div className="routing-card" data-testid="route-institution">
+          <div className="routing-icon"><InstitutionIcon /></div>
+          <h3>Academic Institutions</h3>
+          <p>Establish an MoU with Rodic to access real-world infrastructure data, co-publish applied research, and secure funded engineering projects for your department.</p>
+          <button className="btn btn-primary" onClick={() => onNav("contact")}>
+            Partner with REEP <span className="ar">→</span>
+          </button>
+        </div>
+
+        {/* Researcher Path */}
+        <div className="routing-card" data-testid="route-researcher">
+          <div className="routing-icon"><ResearchIcon /></div>
+          <h3>Applied Researchers & PhDs</h3>
+          <p>Work on live problem statements — pavement fatigue modelling, bridge health monitoring, urban water-network optimisation — with field datasets and named co-authorship.</p>
+          <button className="btn btn-primary" onClick={() => onNav("contact")}>
+            Submit a Research Proposal <span className="ar">→</span>
+          </button>
+        </div>
+
+        {/* Startup Path */}
+        <div className="routing-card" data-testid="route-startup">
+          <div className="routing-icon"><RocketIcon /></div>
+          <h3>Deep-Tech Startups</h3>
+          <p>Deploy your solution on live government infrastructure through paid pilots, validated and scaled via Rodic's <a href="https://nasscom.in/" target="_blank" rel="noopener noreferrer"><strong>NASSCOM</strong></a> collaboration track.</p>
+          <button className="btn btn-primary" onClick={() => onNav("contact")}>
+            Begin Startup Application <span className="ar">→</span>
+          </button>
+          <span className="routing-note" data-testid="startup-nasscom-note">Validated through our NASSCOM partnership.</span>
+        </div>
+
+      </div>
+    </Section>
+  );
 }
 
-/* ============ ABOUT CREDS ============ */
-.about-creds {
-  display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4);
-  margin-top: var(--s4); padding-top: var(--s4);
-  border-top: 1px solid var(--glass-border);
-}
-.about-creds span {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-2);
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.about-creds span::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--orange); display: inline-block;
-}
-
-/* ============ OUR LEADERS ============ */
-#leaders {
-  background: linear-gradient(180deg, var(--navy-deep), var(--navy));
-}
-.leaders-layout {
-  display: grid;
-  grid-template-columns: 0.4fr 1fr;
-  gap: var(--s6);
-  align-items: center;
-}
-.leaders-intro h2 {
-  color: var(--orange);
-  font-family: var(--display);
-  font-style: italic;
-  margin-bottom: var(--s3);
-}
-.leaders-intro p {
-  font-size: 17px; line-height: 1.65; color: var(--text-2);
-  margin-bottom: var(--s4);
-}
-.explore-btn {
-  display: inline-flex; align-items: center; gap: 12px;
-  font-family: var(--display); font-weight: 600; font-size: 14px;
-  color: var(--text); cursor: pointer; text-decoration: none;
-  transition: color var(--fast);
-}
-.explore-btn:hover { color: var(--orange); }
-.explore-circle {
-  width: 48px; height: 48px; border-radius: 50%;
-  background: var(--orange); display: flex; align-items: center;
-  justify-content: center; font-family: var(--mono); font-size: 16px;
-  color: var(--navy-deep); transition: transform var(--fast);
-}
-.explore-btn:hover .explore-circle { transform: scale(1.1); }
-
-.leaders-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s3);
-}
-.leader-card {
-  position: relative;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  transition: transform var(--fast), box-shadow var(--fast);
-}
-.leader-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-}
-.leader-photo {
-  width: 100%; aspect-ratio: 3/4;
-  background: linear-gradient(135deg, var(--navy-light), var(--navy-deep));
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-.leader-photo .avatar-placeholder {
-  width: 80px; height: 80px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--sky), var(--sky-light));
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--display); font-weight: 700; font-size: 28px;
-  color: var(--navy-deep);
-}
-.leader-info {
-  padding: var(--s3);
-  background: rgba(1,22,39,0.9);
-  backdrop-filter: blur(8px);
-}
-.leader-info .name {
-  font-family: var(--display); font-weight: 700; font-size: 16px;
-  color: var(--text); display: block; margin-bottom: 4px;
-}
-.leader-info .designation {
-  font-family: var(--body); font-size: 13px; font-weight: 500;
-  color: var(--orange);
+/* ─── OUR LEADERS ─── */
+function Leaders() {
+  return (
+    <Section id="leaders">
+      <div className="leaders-layout">
+        <div className="leaders-intro">
+          <h2 style={{ fontStyle: "italic" }}>REEP<br />LEADERSHIP</h2>
+          <p>
+            Meet the dedicated leaders driving the Rodic Engineering Excellence Program
+            forward with unparalleled experience and a commitment to infrastructure innovation.
+          </p>
+          <span className="explore-btn">
+            <span className="explore-circle">→</span>
+            EXPLORE
+          </span>
+        </div>
+        <div className="leaders-cards">
+          {leaders.map((l, i) => (
+            <div className="leader-card" key={i} data-testid={`leader-card-${i}`}>
+              <div className="leader-photo">
+                {l.image ? (
+                  <img src={l.image} alt={l.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center bottom" }} />
+                ) : (
+                  <div className="avatar-placeholder">{l.initials}</div>
+                )}
+              </div>
+              <div className="leader-info">
+                <span className="name">{l.name}</span>
+                <span className="designation">{l.designation}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Section>
+  );
 }
 
-/* ============ CONTACT ============ */
-#contact {
-  background: var(--navy);
-  border-top: 1px solid var(--glass-border);
-}
-.contact-grid {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: var(--s6);
-  align-items: start;
-}
-.contact-info h2 { margin-bottom: var(--s3); }
-.contact-info .lede { font-size: 17px; line-height: 1.65; margin-bottom: var(--s5); }
-.contact-detail {
-  display: flex; flex-direction: column; gap: var(--s3);
-}
-.contact-item {
-  display: flex; align-items: flex-start; gap: var(--s2);
-}
-.contact-icon {
-  width: 40px; height: 40px; flex-shrink: 0;
-  border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; color: var(--orange);
-}
-.contact-item .label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--text-muted); display: block;
-  margin-bottom: 4px;
-}
-.contact-item .value {
-  font-size: 15px; color: var(--text);
+/* ─── CONTACT FORM ─── */
+function Contact() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [area, setArea] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    setError("");
+    if (!name.trim()) { setError("Please enter your name."); return; }
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { setError("Enter a valid email address."); return; }
+    if (!organization.trim()) { setError("Please enter your organization."); return; }
+    if (!message.trim()) { setError("Please enter a message."); return; }
+
+    try {
+      await axios.post(`${API}/registrations`, {
+        email: email.trim(),
+        role: "Enquiry",
+        sectors: [area.trim()],
+        name: name.trim(),
+        phone: phone.trim(),
+        organization: organization.trim(),
+        message: message.trim(),
+      });
+      setDone(true);
+    } catch (e) {
+      console.error("contact form failed", e);
+      setError("Failed to send message. Please try again later.");
+    }
+  };
+
+  return (
+    <Section id="contact">
+      <div className="contact-grid">
+        <div className="contact-info">
+          <Eyebrow>Get in Touch with the REEP Team</Eyebrow>
+          <h2>Let's build <span className="gradient-text">together.</span></h2>
+          <p className="lede">
+            Have a question about the REEP program, or want to explore a partnership?
+            We'd love to hear from you.
+          </p>
+          <div className="contact-detail">
+            <div className="contact-item">
+              <div className="contact-icon">✉</div>
+              <div>
+                <span className="label">Email</span>
+                <span className="value">partnerships@rodic.in</span>
+              </div>
+            </div>
+            <div className="contact-item">
+              <div className="contact-icon">◉</div>
+              <div>
+                <span className="label">Office</span>
+                <span className="value">New Delhi, India</span>
+              </div>
+            </div>
+            <div className="contact-item">
+              <div className="contact-icon">↗</div>
+              <div>
+                <span className="label">Social</span>
+                <span className="value">LinkedIn · X / Twitter</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="contact-form-box" id="contactForm">
+          {done ? (
+            <div className="form-success" data-testid="contact-success">
+              <div className="check-circle">✓</div>
+              <h3>Message Received</h3>
+              <p>Thank you for reaching out to REEP. Our team will get back to you shortly.</p>
+            </div>
+          ) : (
+            <>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Your Name</label>
+                  <input
+                    className={`form-input${error && !name ? " err" : ""}`}
+                    data-testid="contact-name-input"
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email Address</label>
+                  <input
+                    className={`form-input${error && !email ? " err" : ""}`}
+                    data-testid="contact-email-input"
+                    type="email"
+                    placeholder="you@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Phone Number <span className="opt">(optional)</span></label>
+                  <input
+                    className="form-input"
+                    data-testid="contact-phone-input"
+                    type="tel"
+                    placeholder="+91..."
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Organization</label>
+                  <input
+                    className={`form-input${error && !organization ? " err" : ""}`}
+                    data-testid="contact-org-input"
+                    type="text"
+                    placeholder="Institution / Company"
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Area of Interest</label>
+                <select
+                  className="form-input"
+                  data-testid="contact-area-input"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  style={{ backgroundColor: "var(--navy)", color: "var(--text)" }}
+                >
+                  <option value="">Select an area...</option>
+                  <option value="Research Partnerships">Research Partnerships</option>
+                  <option value="Startup Collaboration">Startup Collaboration</option>
+                  <option value="General Enquiry">General Enquiry</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Message</label>
+                <textarea
+                  className={`form-textarea${error && !message ? " err" : ""}`}
+                  data-testid="contact-message-input"
+                  placeholder="Tell us about your project or inquiry..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </div>
+              {error && <div className="form-error" data-testid="contact-error">{error}</div>}
+              <button className="form-submit" data-testid="contact-submit-btn" onClick={handleSubmit}>
+                Request a Collaboration Brief <span style={{ fontFamily: "var(--mono)" }}>→</span>
+              </button>
+              <p className="form-sla" style={{ fontSize: "12px", color: "var(--text-2)", marginTop: "16px", textAlign: "center" }}>
+                Our partnership team (Shreya Sharma) reviews all briefs within 24 hours. Your data is secure and never shared.
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </Section>
+  );
 }
 
-/* Contact Form */
-.contact-form-box {
-  background: var(--surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: var(--s5);
-  backdrop-filter: blur(12px);
-}
-.form-group { margin-bottom: var(--s3); }
-.form-label {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--text-muted);
-  display: block; margin-bottom: var(--s1);
-}
-.form-input, .form-textarea {
-  width: 100%;
-  background: rgba(1,22,39,0.6);
-  border: 1px solid var(--glass-border);
-  color: var(--text);
-  font-family: var(--body); font-size: 15px;
-  padding: 14px 16px; outline: none;
-  border-radius: var(--radius-sm);
-  transition: border-color var(--fast);
-}
-.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
-.form-input:focus, .form-textarea:focus { border-color: var(--orange); }
-.form-input.err { border-color: #FF6B6B; }
-.form-textarea { min-height: 120px; resize: vertical; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
-.form-submit {
-  width: 100%; padding: 16px;
-  background: linear-gradient(135deg, var(--orange), var(--amber));
-  color: var(--navy-deep); font-family: var(--display); font-weight: 700;
-  font-size: 15px; border: none; border-radius: var(--radius-sm);
-  cursor: pointer; transition: all var(--fast);
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.form-submit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.15);
-}
-.form-error { font-family: var(--mono); font-size: 12px; color: #FF6B6B; margin-top: var(--s1); }
-.form-success {
-  text-align: center; padding: var(--s5) 0;
-}
-.form-success .check-circle {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--orange), var(--amber));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; color: var(--navy-deep);
-  margin: 0 auto var(--s3);
-}
-.form-success h3 { margin-bottom: var(--s2); }
-.form-success p { font-size: 15px; }
-
-/* ============ FOOTER ============ */
-.footer {
-  background: var(--navy-deep);
-  border-top: 1px solid var(--glass-border);
-}
-.footer-inner {
-  max-width: var(--maxw); margin: 0 auto;
-  padding: var(--s6) var(--s4) var(--s4);
-  display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: var(--s5);
-}
-.footer .fbrand {
-  font-family: var(--display); font-weight: 700; font-size: 24px;
-  color: var(--text); margin-bottom: var(--s2); letter-spacing: -0.02em;
-}
-.footer .fbrand .accent { color: var(--orange); }
-.footer .ftag {
-  font-size: 14px; color: var(--text-muted); max-width: 320px; line-height: 1.6;
-}
-.footer h5 {
-  font-family: var(--mono); font-weight: 400; font-size: 11px;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
-  margin: 0 0 var(--s3);
-}
-.footer-link {
-  display: block; font-size: 14px; color: var(--text-2);
-  padding: 6px 0; cursor: pointer; transition: color var(--fast);
-  text-decoration: none;
-}
-.footer-link:hover { color: var(--orange); }
-.social {
-  font-family: var(--mono); font-size: 12px; color: var(--text-2);
-  border: 1px solid var(--glass-border); display: inline-block;
-  padding: 8px 14px; margin-right: 8px; cursor: pointer;
-  transition: all var(--fast); border-radius: var(--radius-sm);
-}
-.social:hover { border-color: var(--orange); color: var(--orange); }
-.footer-bottom {
-  border-top: 1px solid var(--glass-border);
-  max-width: var(--maxw); margin: 0 auto; padding: var(--s3) var(--s4);
-  font-family: var(--mono); font-size: 11px; color: var(--text-muted);
-  letter-spacing: 0.06em;
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s2);
+/* ─── FOOTER ─── */
+function Footer({ onNav }) {
+  return (
+    <footer className="footer" data-testid="footer">
+      <div className="footer-inner">
+        <div>
+          <div className="fbrand">REEP</div>
+          <p className="ftag">REEP — Rodic Engineering Excellence Program. Infrastructure innovation through industry-academia collaboration.</p>
+        </div>
+        <div>
+          <h5>Navigate</h5>
+          {[["home", "Home"], ["focus", "Focus Areas"], ["leaders", "Leaders"], ["contact", "Contact"]].map(([id, label]) => (
+            <span className="footer-link" key={id} data-testid={`footer-link-${id}`} onClick={() => onNav(id)}>{label}</span>
+          ))}
+        </div>
+        <div>
+          <h5>Connect</h5>
+          <p className="ftag" style={{ marginBottom: "14px" }}>partnerships@rodic.in</p>
+          <div>
+            <span className="social">LinkedIn</span>
+            <span className="social">X / Twitter</span>
+          </div>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <span>© 2026 REEP — Rodic Engineering Excellence Program</span>
+          <span style={{ color: "var(--text-2)", fontSize: "10px" }}>A Division of Rodic Consultants Private Limited. ISO 9001:2015 Certified. Govt Empanelled.</span>
+        </div>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <span>Privacy Policy</span>
+          <span>Terms of Service</span>
+        </div>
+      </div>
+    </footer>
+  );
 }
 
-/* ============ SCROLL TO TOP ============ */
-.scroll-top {
-  position: fixed; bottom: var(--s4); right: var(--s4); z-index: 90;
-  width: 48px; height: 48px; border-radius: 50%;
-  background: var(--orange); color: var(--navy-deep);
-  border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  transition: all var(--fast);
-  opacity: 0; pointer-events: none; transform: translateY(12px);
-}
-.scroll-top.visible {
-  opacity: 1; pointer-events: auto; transform: none;
-}
-.scroll-top:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+/* ─── SCROLL-TO-TOP BUTTON ─── */
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setVisible(window.scrollY > 400);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <button
+      className={`scroll-top${visible ? " visible" : ""}`}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Scroll to top"
+    >
+      ↑
+    </button>
+  );
 }
 
-/* ============ SCROLL PROGRESS BAR ============ */
-.scroll-progress {
-  position: fixed; top: 72px; left: 0; z-index: 99;
-  height: 3px; background: linear-gradient(90deg, var(--orange), var(--amber), var(--sky));
-  transition: width 50ms linear;
+/* ─── SCROLL PROGRESS BAR ─── */
+function ScrollProgress() {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      setWidth(pct);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return <div className="scroll-progress" style={{ width: `${width}%` }} />;
 }
 
-/* ============ RESPONSIVE ============ */
-@media (max-width: 1024px) {
-  .leaders-layout { grid-template-columns: 1fr; gap: var(--s4); }
-  .leaders-cards { grid-template-columns: repeat(3, 1fr); }
-  .contact-grid { grid-template-columns: 1fr; gap: var(--s5); }
+/* ─── APP ─── */
+function App() {
+  const onNav = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <div className="reep-root">
+      <Nav onNav={onNav} />
+      <ScrollProgress />
+      <Hero onNav={onNav} />
+      <AboutReep />
+      <FocusAreas />
+      <AudienceRouting onNav={onNav} />
+      <Leaders />
+      <Contact />
+      <Footer onNav={onNav} />
+      <ScrollToTop />
+    </div>
+  );
 }
-@media (max-width: 860px) {
-  .leaders-cards { grid-template-columns: repeat(2, 1fr); }
-  .flashcard-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-  .footer-inner { grid-template-columns: 1fr; gap: var(--s4); }
-}
-@media (max-width: 600px) {
-  .band { padding: var(--s7) 0; }
-  .leaders-cards { grid-template-columns: 1fr; }
-  .flashcard-grid { grid-template-columns: 1fr; }
-  .flashcard { height: 200px; }
-  .form-row { grid-template-columns: 1fr; }
-  .hero h1 { font-size: clamp(32px, 8vw, 48px); }
-  .hero .sub { font-size: 16px; }
-  .hero-stats { gap: var(--s3); padding: var(--s3) var(--s4); }
-  .hero-stat-num { font-size: 18px; }
-  .hero-stat-divider { height: 28px; }
-}
+
+export default App;
