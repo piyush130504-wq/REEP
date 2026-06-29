@@ -278,31 +278,11 @@ function AudienceRouting({ onNav }) {
       <div className="sec-head" style={{ marginBottom: "var(--s6)" }}>
         <Eyebrow>Collaborate</Eyebrow>
         <h2>Join the <span className="gradient-text">ecosystem.</span></h2>
-        <p className="lede">Three ways to engage — each built around how you work.</p>
+        <p className="lede">One pathway to engage — built around how you work.</p>
       </div>
-      <div className="routing-grid">
+      <div className="routing-split">
 
-        {/* Institution Path */}
-        <div className="routing-card" data-testid="route-institution">
-          <div className="routing-icon"><InstitutionIcon /></div>
-          <h3>Academic Institutions</h3>
-          <p>Establish an MoU with Rodic to access real-world infrastructure data, co-publish applied research, and secure funded engineering projects for your department.</p>
-          <button className="btn btn-primary" onClick={() => onNav("contact")}>
-            Partner with REEP <span className="ar">→</span>
-          </button>
-        </div>
-
-        {/* Researcher Path */}
-        <div className="routing-card" data-testid="route-researcher">
-          <div className="routing-icon"><ResearchIcon /></div>
-          <h3>Applied Researchers & PhDs</h3>
-          <p>Work on live problem statements — pavement fatigue modelling, bridge health monitoring, urban water-network optimisation — with field datasets and named co-authorship.</p>
-          <button className="btn btn-primary" onClick={() => onNav("contact")}>
-            Submit a Research Proposal <span className="ar">→</span>
-          </button>
-        </div>
-
-        {/* Startup Path */}
+        {/* Startup Card */}
         <div className="routing-card" data-testid="route-startup">
           <div className="routing-icon"><RocketIcon /></div>
           <h3>Deep-Tech Startups</h3>
@@ -311,6 +291,17 @@ function AudienceRouting({ onNav }) {
             Begin Startup Application <span className="ar">→</span>
           </button>
           <span className="routing-note" data-testid="startup-nasscom-note">Validated through our NASSCOM partnership.</span>
+        </div>
+
+        {/* Event Photo Grid */}
+        <div className="routing-gallery">
+          <div className="routing-gallery-grid">
+            <img src="/event1.jpg" alt="REEP event — outdoor presentation" className="gallery-img" />
+            <img src="/event2.jpg" alt="Rodic Digital booth at AI Impact Summit" className="gallery-img" />
+            <img src="/event3.jpg" alt="REEP event" className="gallery-img" />
+            <img src="/event4.jpg" alt="AI Impact Summit demo" className="gallery-img" />
+          </div>
+          <p className="routing-note" style={{ marginTop: "var(--s3)", textAlign: "center" }}>REEP in action — from pilots to partnerships.</p>
         </div>
 
       </div>
